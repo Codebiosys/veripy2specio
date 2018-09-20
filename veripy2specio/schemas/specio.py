@@ -2,17 +2,17 @@
 
 
 organization = {
-    'type' : 'object',
-    'properties' : {
+    'type': 'object',
+    'properties': {
         'name': {'type': 'string'},
     },
 }
 
 
 step_attachment = {
-    'type' : 'object',
+    'type': 'object',
     'required': ['name', 'data'],
-    'properties' : {
+    'properties': {
         'name': {'type': 'string'},
         'description': {'type': 'string'},
         'data': {'type': 'string'},
@@ -21,14 +21,13 @@ step_attachment = {
 
 
 step = {
-    'type' : 'object',
-    'properties' : {
+    'type': 'object',
+    'properties': {
         'name': {'type': 'string'},
         'value': {'type': 'string'},
         'passed': {'type': 'boolean'},
         'attachments': {
             'type': 'array',
-#             'items': step_attachment,
         },
     },
     'required': [
@@ -42,11 +41,11 @@ step_group = {
     'type': 'object',
     'properties': {
         'given_when': {
-            'type' : 'array',
+            'type': 'array',
             'items': step,
         },
         'then': {
-            'type' : 'array',
+            'type': 'array',
             'items': step,
         },
     },
@@ -60,8 +59,8 @@ step_group = {
 scenario_tag = {
     'type': 'object',
     'properties': {
-        'name': {'type' : 'string'},
-        'last': {'type' : 'bool'},
+        'name': {'type': 'string'},
+        'last': {'type': 'bool'},
     },
     'required': [
         'name',
@@ -70,13 +69,13 @@ scenario_tag = {
 
 
 scenario = {
-    'type' : 'object',
-    'properties' : {
+    'type': 'object',
+    'properties': {
         'number': {'type': 'number'},
         'name': {'type': 'string'},
         'all_passed': {'type': 'boolean'},
         'steps': {
-            'type' : 'array',
+            'type': 'array',
             'items': step_group,
         },
     },
@@ -91,15 +90,15 @@ scenario = {
 
 
 feature = {
-    'type' : 'object',
-    'properties' : {
+    'type': 'object',
+    'properties': {
         'name': {'type': 'string'},
         'scenario_tags': {
             'type': 'array',
             'items': scenario_tag
         },
         'scenarios': {
-            'type' : 'array',
+            'type': 'array',
             'items': scenario,
         },
     },
@@ -118,12 +117,11 @@ feature = {
 schema = {
     'type': 'object',
     'required': ['features', 'organization'],
-    'properties' : {
-        'organization' : organization,
-        'features' : {
-            'type' : 'array',
+    'properties': {
+        'organization': organization,
+        'features': {
+            'type': 'array',
             'items': feature,
         },
     },
 }
-

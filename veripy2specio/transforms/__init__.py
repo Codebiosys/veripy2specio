@@ -46,7 +46,7 @@ class Veripy2SpecioTransform(object):
             elif step_type in (constants.GIVEN, constants.WHEN):
                 # GIVEN/WHEN: Toggle the switch and push a new group onto the list.
                 switch = 'given_when'
-                groups.append({ 'given_when': [], 'then': []})
+                groups.append({'given_when': [], 'then': []})
             elif step_type == constants.THEN:
                 # THEN: Toggle the switch
                 switch = 'then'

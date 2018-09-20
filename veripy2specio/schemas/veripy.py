@@ -99,18 +99,18 @@ scenario = {
             'type': 'array',
             'items': tag
         },
-  },
-  'required': [
-    'description',
-    'id',
-    'keyword',
-    'line',
-    'location',
-    'name',
-    'steps',
-    'tags',
-    'type'
-  ]
+    },
+    'required': [
+        'description',
+        'id',
+        'keyword',
+        'line',
+        'location',
+        'name',
+        'steps',
+        'tags',
+        'type'
+    ]
 }
 
 

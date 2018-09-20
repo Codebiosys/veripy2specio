@@ -5,7 +5,6 @@ from veripy2specio.schemas import validate, INPUT_SCHEMA, OUTPUT_SCHEMA, CONFIG_
 from veripy2specio.transforms import Veripy2SpecioTransform
 
 
-
 def load_input(config):
     input = json.load(config.input)
     validate(input, INPUT_SCHEMA)

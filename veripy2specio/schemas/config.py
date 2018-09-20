@@ -16,7 +16,7 @@ organization = {
     'type': 'object',
     'properties': {
         'name': {'type': 'string'},
-        'feature' : feature,
+        'feature': feature,
     },
     'required': [
         'name',
