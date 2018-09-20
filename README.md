@@ -1,5 +1,7 @@
 # Veripy2Specio
 
+[![Build Status](https://travis-ci.com/Codebiosys/veripy2specio.svg?token=sqxCEuNQWHfr2F3qwRmC&branch=master)](https://travis-ci.com/Codebiosys/veripy2specio)
+
 A simple utility to validate and transform VeriPy output files into the Specio format.
 
 **UNDER DEVELOPMENT**
