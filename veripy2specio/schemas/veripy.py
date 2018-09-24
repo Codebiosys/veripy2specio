@@ -1,6 +1,5 @@
 # Components
 
-
 tag = {
     'type': 'object',
     'properties': {
@@ -12,7 +11,6 @@ tag = {
     ]
 }
 
-
 media = {
     'type': 'object',
     'properties': {
@@ -22,7 +20,6 @@ media = {
         'type'
     ]
 }
-
 
 embedding = {
     'type': 'object',
@@ -36,7 +33,6 @@ embedding = {
     ]
 }
 
-
 result = {
     'type': 'object',
     'properties': {
@@ -48,7 +44,6 @@ result = {
         'status'
     ]
 }
-
 
 match = {
     'type': 'object',
@@ -98,7 +93,6 @@ step = {
     ]
 }
 
-
 scenario = {
     'type': 'object',
     'properties': {
@@ -130,7 +124,6 @@ scenario = {
         'type'
     ]
 }
-
 
 feature = {
     'type': 'object',
@@ -164,9 +157,7 @@ feature = {
     ]
 }
 
-
 # Overall Schema
-
 
 schema = {
     'type': 'array',
