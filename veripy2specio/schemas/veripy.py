@@ -2,7 +2,14 @@
 
 
 tag = {
-    # Nothing here
+    'type': 'object',
+    'properties': {
+        'line': {'type': 'integer'},
+        'name': {'type': 'string'}
+    },
+    'required': [
+        'name'
+    ]
 }
 
 
@@ -55,6 +62,16 @@ match = {
     ]
 }
 
+step_docstring = {
+    'type': 'object',
+    'properties': {
+        'line': {'type': 'integer'},
+        'value': {'type': 'string'}
+    },
+    'required': [
+        'value'
+    ]
+}
 
 step = {
     'type': 'object',
@@ -68,7 +85,8 @@ step = {
           'type': 'array',
           'items': embedding
         },
-        'step_type': {'type': 'string'}
+        'step_type': {'type': 'string'},
+        'doc_string': step_docstring
     },
     'required': [
         'keyword',

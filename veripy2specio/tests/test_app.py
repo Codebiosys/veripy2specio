@@ -8,12 +8,12 @@ FIXTURE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'fixtures
 @pytest.fixture(params=[
     {
         'verbose': True,
-        'input': 'valid_schema.json',
+        'input': 'valid_veripy_schema.json',
         'output': 'output.json',
     },
     {
         'verbose': False,
-        'input': 'valid_schema.json',
+        'input': 'valid_veripy_schema.json',
         'output': 'output.json',
     },
 ])

@@ -67,7 +67,7 @@ class Veripy2SpecioTransform(object):
 
     def attachments_from_embeddings(self, embeddings):
         for embedding in embeddings:
-            yield {}
+            yield embedding
 
     def passed_from_step(self, steps):
         for step in steps:
@@ -87,10 +87,17 @@ class Veripy2SpecioTransform(object):
             }
 
     def tags_from_scenarios(self, scenarios):
-        for scenario in scenarios:
-            tags = scenario['tags']
-            for tag in tags:
-                yield tag['name']
+        tags = sorted(set(
+            tag['name']
+            for scenario in scenarios
+            for tag in scenario.get('tags', [])
+            if tag.get('name')
+        ))
+        if tags:
+            if len(tags) > 1:
+                for tag in tags[:len(tags)-1]:
+                    yield {'name': tag, 'last': False}
+            yield {'name': tags[-1], 'last': True}
 
     def scenarios_from_feature(self, feature):
         for i, element in enumerate(feature.pop('elements')):

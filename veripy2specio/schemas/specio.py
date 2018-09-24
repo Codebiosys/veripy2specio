@@ -8,17 +8,44 @@ organization = {
     },
 }
 
+media = {
+    'type': 'object',
+    'properties': {
+        'type': {'type': 'string'}
+    }
+}
+
 
 step_attachment = {
     'type': 'object',
-    'required': ['name', 'data'],
+    'required': [
+        'data',
+        'media'
+    ],
     'properties': {
-        'name': {'type': 'string'},
-        'description': {'type': 'string'},
         'data': {'type': 'string'},
+        'media': media
     },
 }
 
+
+step_result = {
+    'type': 'object',
+    'properties': {
+        'status': {'type': 'string'},
+        'error_message': {'type': 'string'}
+    },
+    'required': [
+        'status'
+    ]
+}
+
+step_doc_string = {
+    'type': 'object',
+    'properties': {
+        'value': {'type': 'string'}
+    }
+}
 
 step = {
     'type': 'object',
@@ -26,8 +53,12 @@ step = {
         'name': {'type': 'string'},
         'value': {'type': 'string'},
         'passed': {'type': 'boolean'},
+        'stored_value': {'type': 'string'},
+        'result': step_result,
+        'doc_string': step_doc_string,
         'attachments': {
             'type': 'array',
+            'items': step_attachment,
         },
     },
     'required': [
@@ -35,7 +66,6 @@ step = {
         'passed'
     ],
 }
-
 
 step_group = {
     'type': 'object',
@@ -60,7 +90,7 @@ scenario_tag = {
     'type': 'object',
     'properties': {
         'name': {'type': 'string'},
-        'last': {'type': 'bool'},
+        'last': {'type': 'boolean'},
     },
     'required': [
         'name',
