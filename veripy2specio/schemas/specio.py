@@ -71,7 +71,9 @@ step_message = {
         'type': {'type': 'string'},
         'reference_number': {'type': 'number'},
         'content': {'type': 'string'},
-        'attachment': attachment
+        'attachment': attachment,
+        'is_attachment': {'type': 'boolean'},
+        'is_deviation': {'type': 'boolean'},
     },
     'required': [
         'type',
@@ -107,7 +109,9 @@ step_group = {
         'messages': {
             'type': 'array',
             'items': step_message,
-        }
+        },
+        'status': {'type': 'string'},
+        'passed': {'type': 'boolean'}
     },
     'required': [
         'given_when',
@@ -120,6 +124,7 @@ scenario = {
     'type': 'object',
     'properties': {
         **specio_base.get('properties'),
+        'scenario_name': {'type', 'string'},
         'description': {'type': 'string'},
         'number': {'type': 'number'},
         'steps': {
@@ -143,6 +148,7 @@ feature = {
     'type': 'object',
     'properties': {
         **specio_base.get('properties'),
+        'feature_name': {'type': 'string'},
         'description': {'type': 'string'},
         'scenarios': {
             'type': 'array',
@@ -159,6 +165,7 @@ feature = {
     },
     'required': [
         *specio_base.get('required'),
+        'feature_name',
         'scenarios',
         'tags',
         'scenario_tags'

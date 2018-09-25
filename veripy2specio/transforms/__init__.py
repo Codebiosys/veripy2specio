@@ -44,7 +44,6 @@ class Veripy2SpecioTransform(object):
         """
         groups = []
         switch = '--invalid--'
-
         for step in steps:
             step_type = step['keyword'].lower()
             if step_type in switch:
@@ -53,7 +52,13 @@ class Veripy2SpecioTransform(object):
             elif step_type in (constants.GIVEN, constants.WHEN):
                 # GIVEN/WHEN: Toggle the switch and push a new group onto the list.
                 switch = 'given_when'
-                groups.append({'given_when': [], 'then': [], 'messages': []})
+                groups.append({
+                    'given_when': [],
+                    'then': [],
+                    'messages': [],
+                    'status': step['status'],
+                    'passed': step['passed']
+                })
             elif step_type == constants.THEN:
                 # THEN: Toggle the switch
                 switch = 'then'
@@ -63,7 +68,12 @@ class Veripy2SpecioTransform(object):
 
             # Add the current step to the ending group.
             groups[-1][switch].append(step)
+            if not step['passed']:
+                # Trip the status only if the step didn't pass
+                groups[-1]['status'] = step['status']
+                groups[-1]['passed'] = step['passed']
             groups[-1]['messages'].extend(step.pop('messages'))
+
         return groups
 
     def description_from_feature(self, feature):
@@ -89,32 +99,41 @@ class Veripy2SpecioTransform(object):
                 'messages': []
 
             }
-            if step.get('doc_string', {}).hasattr('value'):
+            if 'value' in step.get('doc_string', {}):
                 step_result['messages'].append({
                     'type': 'message',
                     'reference_number': self.generate_reference_number(),
-                    'content': step.get('doc_string', {}).get('value')
+                    'content': step.get('doc_string', {}).get('value'),
+                    'is_attachment': False,
+                    'is_deviation': False,
                 })
-            if step.hasattr('stored_value'):
+            if 'stored_value' in step:
                 step_result['messages'].append({
                     'type': 'result',
                     'reference_number': self.generate_reference_number(),
-                    'content': step.get('stored_value')
+                    'content': step.get('stored_value'),
+                    'is_attachment': False,
+                    'is_deviation': False,
                 })
             if step['result']['status'] != constants.PASSED:
                 message = f'The test resulted in a {step["result"]["status"]}, '\
                     'but no message was supplied'
-                if step.get('result', {}).hasattr('error_message'):
+                if 'error_message' in step.get('result', {}):
                     message = step['result']['error_message']
                 step_result['messages'].append({
                     'type': 'error',
                     'reference_number': self.generate_reference_number(),
-                    'content': message
+                    'content': message,
+                    'is_attachment': False,
+                    'is_deviation': True,
                 })
             for embed in step.get('embeddings', []):
                 step_result['messages'].append({
                     'type': 'attachment',
                     'reference_number': self.generate_reference_number(),
+                    'content': "see screenshot",
+                    'is_attachment': True,
+                    'is_deviation': False,
                     'attachment': {
                         'data': embed['data'],
                         'type': embed['media']['type']
@@ -155,6 +174,7 @@ class Veripy2SpecioTransform(object):
             yield {
                 'id': re.sub('\W',  '_', element.get('location')),
                 'name': element.get('name'),
+                'scenario_name': element.get('name'),
                 'keyword': element.get('keyword'),
                 'status': 'passed' if passed else 'failed',
                 'passed': passed,
@@ -183,6 +203,7 @@ class Veripy2SpecioTransform(object):
             yield {
                 'id': re.sub('\W',  '_', feature.get('id')),
                 'name': feature.get('name'),
+                'feature_name': feature.get('name'),
                 'keyword': feature.get('keyword'),
                 'status': 'passed' if passed else 'failed',
                 'passed': passed,
