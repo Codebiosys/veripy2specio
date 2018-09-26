@@ -86,7 +86,6 @@ step = {
     'required': [
         'keyword',
         'line',
-        'match',
         'name',
         'result',
         'step_type'

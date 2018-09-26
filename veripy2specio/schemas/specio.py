@@ -43,11 +43,13 @@ tag = {
 reference = {
     'type': 'object',
     'properties': {
-        'value': {'type': 'number'},
+        'id': {'type': 'string'},
+        'reference_number': {'type': 'number'},
         'last': {'type': 'boolean'},
     },
     'required': [
-        'value',
+        'id',
+        'reference_number',
         'last',
     ],
 }
@@ -65,19 +67,35 @@ attachment = {
     },
 }
 
+error = {
+    'type': 'object',
+    'required': [
+        'expected',
+        'actual',
+    ],
+    'properties': {
+        'expected': {'type': 'string'},
+        'actual': {'type': 'string'},
+        'error_number': {'type': 'number'}
+    },
+}
+
 step_message = {
     'type': 'object',
     'properties': {
         'type': {'type': 'string'},
+        'id': {'type': 'string'},
         'reference_number': {'type': 'number'},
-        'content': {'type': 'string'},
-        'attachment': attachment,
-        'is_attachment': {'type': 'boolean'},
+        'result': {'type': 'string'},
         'is_deviation': {'type': 'boolean'},
+        'attachment': attachment,
+        'error': error,
     },
     'required': [
         'type',
+        'id',
         'reference_number',
+        'is_deviation'
     ]
 }
 
@@ -85,6 +103,7 @@ step = {
     'type': 'object',
     'properties': {
         **specio_base.get('properties'),
+        'note': {'type': 'string'},
         'references': {
             'type': 'array',
             'items': reference
@@ -124,7 +143,7 @@ scenario = {
     'type': 'object',
     'properties': {
         **specio_base.get('properties'),
-        'scenario_name': {'type', 'string'},
+        'scenario_name': {'type': 'string'},
         'description': {'type': 'string'},
         'number': {'type': 'number'},
         'steps': {
@@ -138,6 +157,7 @@ scenario = {
     },
     'required': [
         *specio_base.get('required'),
+        'scenario_name',
         'number',
         'steps',
         'tags'
@@ -174,45 +194,16 @@ feature = {
 
 # Report Schema
 
-# specio = {
-#     'type': 'object',
-#     'properties': {
-#         'os': app_base,
-#         'browser': app_base,
-#         'user': 'string',
-#         'report_date': 'string',
-#         'specio_version': 'string'
-#     }
-# }
-#
-# application = app_base
-#
-# organization = {
-#     'type': 'object',
-#     'required': [
-#         'name'
-#     ],
-#     'properties': {
-#         'name': {
-#             'type': 'string'
-#         },
-#         'logo': {
-#             'type': 'string'
-#         }
-#     }
-# }
 
 # Overall Schema
 schema = {
     'type': 'object',
     'required': [
         'features',
-        # 'organization'
+        'all_passed',
     ],
     'properties': {
-        # 'organization': organization,
-        # 'application': application,
-        # 'specio': specio,
+        'all_passed': {'type': 'boolean'},
         'features': {
             'type': 'array',
             'items': feature,

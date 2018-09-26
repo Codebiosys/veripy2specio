@@ -23,10 +23,13 @@ class Veripy2SpecioTransform(object):
 
     def __init__(self):
         self.reference_number = 1
+        self.error_number = 1
 
     def __call__(self, input):
+        features = [feature for feature in self.features_from_input(input)]
         return {
-            'features': [feature for feature in self.features_from_input(input)],
+            'all_passed': all(self.passed_from_children(features)),
+            'features': features,
         }
 
     # Transformation Methods
@@ -34,6 +37,11 @@ class Veripy2SpecioTransform(object):
     def generate_reference_number(self):
         reference = self.reference_number
         self.reference_number += 1
+        return reference
+
+    def generate_error_number(self):
+        reference = self.error_number
+        self.error_number += 1
         return reference
 
     def group_steps(self, steps):
@@ -89,8 +97,9 @@ class Veripy2SpecioTransform(object):
 
     def steps_from_element(self, element):
         for step in element.pop('steps'):
+            step_id = re.sub('\W',  '_', f'{element["location"]}_{step["line"]}')
             step_result = {
-                'id': re.sub('\W',  '_', f'{element["location"]}_{step["line"]}'),
+                'id': step_id,
                 'name': step['name'],
                 'keyword': step['keyword'],
                 'status': step['result']['status'],
@@ -100,39 +109,55 @@ class Veripy2SpecioTransform(object):
 
             }
             if 'value' in step.get('doc_string', {}):
-                step_result['messages'].append({
-                    'type': 'message',
-                    'reference_number': self.generate_reference_number(),
-                    'content': step.get('doc_string', {}).get('value'),
-                    'is_attachment': False,
-                    'is_deviation': False,
-                })
+                # reference_number = self.generate_reference_number()
+                step_result['note'] = step.get('doc_string', {}).get('value')
+                # ['messages'].append({
+                #     'type': 'note',
+                #     'id': f'{step_id}_{reference_number}',
+                #     'reference_number': reference_number,
+                #     'note': step.get('doc_string', {}).get('value'),
+                #     'is_deviation': False
+                # })
             if 'stored_value' in step:
+                reference_number = self.generate_reference_number()
                 step_result['messages'].append({
                     'type': 'result',
-                    'reference_number': self.generate_reference_number(),
-                    'content': step.get('stored_value'),
-                    'is_attachment': False,
-                    'is_deviation': False,
+                    'id': f'{step_id}_{reference_number}',
+                    'reference_number': reference_number,
+                    'result': step.get('stored_value'),
+                    'is_deviation': False
                 })
             if step['result']['status'] != constants.PASSED:
-                message = f'The test resulted in a {step["result"]["status"]}, '\
-                    'but no message was supplied'
+                message = f'The test was {step["result"]["status"]}, '\
+                    'and no message was supplied'
+                is_deviation = False
                 if 'error_message' in step.get('result', {}):
                     message = step['result']['error_message']
-                step_result['messages'].append({
+                if step['result']['status'] == constants.FAILED:
+                    is_deviation = True
+
+                reference_number = self.generate_reference_number()
+                error_message = {
                     'type': 'error',
-                    'reference_number': self.generate_reference_number(),
-                    'content': message,
-                    'is_attachment': False,
-                    'is_deviation': True,
-                })
+                    'id': f'{step_id}_{reference_number}',
+                    'reference_number': reference_number,
+                    'is_deviation': is_deviation,
+                    'error': {
+                        'expected': step['name'],
+                        'actual': message
+                    }
+                }
+                if is_deviation:
+                    error_number = self.generate_error_number()
+                    error_message['error']['error_number'] = error_number
+                step_result['messages'].append(error_message)
+
             for embed in step.get('embeddings', []):
+                reference_number = self.generate_reference_number()
                 step_result['messages'].append({
                     'type': 'attachment',
-                    'reference_number': self.generate_reference_number(),
-                    'content': "see screenshot",
-                    'is_attachment': True,
+                    'id': f'{step_id}_{reference_number}',
+                    'reference_number': reference_number,
                     'is_deviation': False,
                     'attachment': {
                         'data': embed['data'],
@@ -143,12 +168,18 @@ class Veripy2SpecioTransform(object):
                 if len(step_result['messages']) > 1:
                     for message in step_result['messages'][:len(step_result['messages'])-1]:
                         step_result['references'].append(
-                            {'value': message['reference_number'],
-                             'last': False}
+                            {
+                                'id': message['id'],
+                                'reference_number': message['reference_number'],
+                                'last': False
+                            }
                         )
                 step_result['references'].append(
-                    {'value': step_result['messages'][-1]['reference_number'],
-                     'last': True}
+                    {
+                        'id': step_result['messages'][-1]['id'],
+                        'reference_number': step_result['messages'][-1]['reference_number'],
+                        'last': True
+                     }
                 )
             yield step_result
 
