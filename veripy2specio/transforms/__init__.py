@@ -142,6 +142,8 @@ class Veripy2SpecioTransform(object):
                     'id': f'{step_id}_{reference_number}',
                     'reference_number': reference_number,
                     'is_deviation': is_deviation,
+                    'status': step['result']['status'],
+                    'passed': False,
                     'error': {
                         'expected': step['name'],
                         'actual': message
@@ -159,6 +161,8 @@ class Veripy2SpecioTransform(object):
                     'id': f'{step_id}_{reference_number}',
                     'reference_number': reference_number,
                     'is_deviation': False,
+                    'status': step['result']['status'],
+                    'passed': step['result']['status'] == constants.PASSED,
                     'attachment': {
                         'data': embed['data'],
                         'type': embed['media']['type']
