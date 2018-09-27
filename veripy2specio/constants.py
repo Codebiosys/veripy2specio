@@ -1,4 +1,5 @@
 PASSED = 'passed'
+FAILED = 'failed'
 
 
 WHEN = 'when'

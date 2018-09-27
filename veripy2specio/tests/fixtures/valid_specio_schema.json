@@ -1,12 +1,89 @@
 {
-  "organization": { "name": "A test organization" },
   "features": [
     {
+      "id": "test_that_the_schema_is_valid",
       "name": "Test that the schema is valid.",
+      "description": "<p>The feature is valid</p>",
+      "keyword": "Feature",
+      "status": "passed",
+      "passed": true,
+      "tags": [
+        {
+          "name": "feature",
+          "last": true
+        }
+      ],
+      "scenario_tags": [
+        {
+          "name": "scenario",
+          "last": false
+        },
+        {
+          "name": "feature",
+          "last": true
+        }
+      ],
       "scenarios": [
         {
-              "name": "Test that the schema is valid.",
-              "steps": []
+          "id": "test_that_the_schema_is_valid_test_that_the_scenario_is_valid",
+          "name": "Test that the scenario is valid.",
+          "description": "<p>The scenario is valid</p>",
+          "number": 1,
+          "keyword": "Scenario",
+          "status": "passed",
+          "passed": true,
+          "tags": [
+            {
+              "name": "scenario",
+              "last": true
+            }
+          ],
+          "steps": [
+            {
+              "given_when": [
+                {
+                  "id": "test_that_the_scenario_is_valid_line_1",
+                  "name": "that the step is valid.",
+                  "references": [],
+                  "keyword": "Given",
+                  "status": "passed",
+                  "passed": true,
+                }
+              ],
+              "then": [
+                {
+                  "id": "test_that_the_scenario_is_valid_line_2",
+                  "name": "the step is valid.",
+                  "references": [2],
+                  "keyword": "Then",
+                  "status": "passed",
+                  "passed": true,
+
+                }
+              ],
+              "messages": [
+                {
+                  "type": "result",
+                  "reference_number": 2,
+                  "content": "captured data"
+                },
+                {
+                  "type": "error",
+                  "reference_number": 2,
+                  "content": "captured data was not captured"
+                },
+                {
+                  "type": "attachment",
+                  "reference_number": 2,
+                  "content": "Attached screenshot",
+                  "attachment": {
+                    "data": "base64data",
+                    "type": "image/png"
+                  }
+                },
+              ]
+            },
+          ]
         }
       ]
     }
