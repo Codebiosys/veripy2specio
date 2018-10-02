@@ -112,14 +112,10 @@ scenario = {
         },
     },
     'required': [
-        'description',
-        'id',
         'keyword',
-        'line',
         'location',
         'name',
         'steps',
-        'tags',
         'type'
     ]
 }
@@ -144,8 +140,6 @@ feature = {
         },
     },
     'required': [
-        'description',
-        'elements',
         'id',
         'keyword',
         'line',

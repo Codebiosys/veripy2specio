@@ -1,16 +1,5 @@
 # Base Components
 
-# app_base = {
-#     'type': 'object',
-#     'properties': {
-#         'name': 'string',
-#         'version': 'string',
-#     },
-#     'required': [
-#         'name'
-#     ]
-# }
-
 specio_base = {
     'properties': {
         'id': {'type': 'string'},
@@ -26,6 +15,24 @@ specio_base = {
         'status',
         'passed',
     ]
+}
+
+message_base = {
+    'type': 'object',
+    'required': [
+        'id',
+        'reference_number',
+        'status',
+        'passed',
+        'is_deviation',
+    ],
+    'properties': {
+        'id': {'type': 'string'},
+        'reference_number': {'type': 'string'},
+        'status': {'type': 'string'},
+        'passed': {'type': 'boolean'},
+        'is_deviation': {'type': 'boolean'},
+    },
 }
 
 tag = {
@@ -70,6 +77,7 @@ attachment = {
 error = {
     'type': 'object',
     'required': [
+        'error_number',
         'expected',
         'actual',
     ],
@@ -83,19 +91,21 @@ error = {
 step_message = {
     'type': 'object',
     'properties': {
-        'type': {'type': 'string'},
         'id': {'type': 'string'},
         'reference_number': {'type': 'number'},
-        'result': {'type': 'string'},
         'is_deviation': {'type': 'boolean'},
+        'status': {'type': 'string'},
+        'passed': {'type': 'boolean'},
         'attachment': attachment,
         'error': error,
+        'result': {'type': 'string'}
     },
     'required': [
-        'type',
         'id',
         'reference_number',
-        'is_deviation'
+        'is_deviation',
+        'status',
+        'passed'
     ]
 }
 
@@ -136,6 +146,8 @@ step_group = {
         'given_when',
         'then',
         'messages',
+        'passed',
+        'status'
     ],
 }
 
@@ -174,6 +186,17 @@ feature = {
             'type': 'array',
             'items': scenario,
         },
+        'has_scenarios': {'type': 'boolean'},
+        'prerequisites': {
+            'type': 'array',
+            'items': scenario,
+        },
+        'has_prerequisites': {'type': 'boolean'},
+        'cleanup': {
+            'type': 'array',
+            'items': scenario,
+        },
+        'has_cleanup': {'type': 'boolean'},
         'tags': {
             'type': 'array',
             'items': tag,
@@ -181,14 +204,16 @@ feature = {
         'scenario_tags': {
             'type': 'array',
             'items': tag,
-        }
+        },
+        'feature_number': {'type': 'number'}
     },
     'required': [
         *specio_base.get('required'),
         'feature_name',
         'scenarios',
         'tags',
-        'scenario_tags'
+        'scenario_tags',
+        'feature_number'
     ],
 }
 
