@@ -1,5 +1,4 @@
-
-given_step = {
+step_no_doc = {
     'name': "Step Name",
     'keyword': "Given",
     'status': "Passed",
@@ -10,14 +9,18 @@ given_step = {
     'location': "/scenario/file/location/",
     'step_type': "Given",
     'embeddings': [],
-    'doc_string': {
-        "value": "some description"
-    },
     "tags": [
       {
         "line": 2,
         "name": "Test1"
       }]
+}
+
+given_step = {
+    **step_no_doc,
+    'doc_string': {
+        "value": "some description"
+    },
   }
 
 step_with_messages = {

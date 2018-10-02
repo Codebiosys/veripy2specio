@@ -30,10 +30,16 @@ class Feature(SpecioBase):
         """ Trim off the injected <pre> tags and parse the description
         as markdown.
         """
-        description = self.source.get('description', '')
+        description = self.source.get('description', None)
         if description:
-            return markdown2.markdown(description[5:-6])
-        return description
+            stripped = re.sub(
+                        r"<[/]?pre>",
+                        "",
+                        description
+                        ).strip()
+            if stripped:
+                return markdown2.markdown(stripped)
+        return None
 
     def _populate_from_source(self, source):
         """

@@ -1,3 +1,4 @@
+import pytest
 from veripy2specio.tests.fixtures import veripy_feature
 from veripy2specio import constants
 
@@ -33,3 +34,19 @@ def test_feature_properties():
     assert not serialized_feature['has_prerequisites']
     assert not valid_feature.has_cleanup
     assert not serialized_feature['has_cleanup']
+
+
+@pytest.mark.parametrize("no_doc_feature", [
+    veripy_feature.feature_no_doc,
+    veripy_feature.feature_empty_doc,
+    veripy_feature.feature_pre_only_doc,
+])
+def test_no_description(no_doc_feature):
+    from veripy2specio.transforms.feature import Feature
+
+    valid_feature = Feature(no_doc_feature)
+    serialized_feature = valid_feature.serialize()
+    # Base Props
+
+    assert not valid_feature.description
+    assert 'description' not in serialized_feature
