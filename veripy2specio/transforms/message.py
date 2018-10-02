@@ -26,7 +26,7 @@ class Message(object):
     def is_deviation(self):
         return False
 
-    def serialize():
+    def serialize():  # pragma: no cover
         raise NotImplementedError
 
 
@@ -67,16 +67,14 @@ class ErrorMessage(Message):
 
     @property
     def actual(self):
-        message = f'The test was {self.status.value}; '\
-            'No message was supplied'
-        if self.status == Status.SKIPPED:
-            message = f'The test was {self.status.value}; '\
-                'this is likely because a previous step failed.'
-        if self.status == Status.UNDEFINED:
-            message = f'The test was {self.status.value}; '\
-                'This means the plan was not valid.'
+        message = ''
         if 'error_message' in self.source.get('result', {}):
             message = self.source['result']['error_message']
+        elif self.status == Status.SKIPPED:
+            message = "This is likely because a previous step failed."
+        elif self.status == Status.UNDEFINED:
+            message = "This means the plan was not valid."
+
         return message
 
     def serialize(self):

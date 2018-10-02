@@ -37,7 +37,8 @@ result = {
     'type': 'object',
     'properties': {
         'duration': {'type': 'integer'},
-        'status': {'type': 'string'}
+        'status': {'type': 'string'},
+        'error_message': {'type': 'string'}
     },
     'required': [
         'duration',

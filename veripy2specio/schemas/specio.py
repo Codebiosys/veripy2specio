@@ -156,7 +156,11 @@ scenario = {
     'properties': {
         **specio_base.get('properties'),
         'scenario_name': {'type': 'string'},
-        'description': {'type': 'string'},
+        'doc_string': {
+            'type': 'object',
+            'properties': {
+                'value': {'type': 'string'}
+            }},
         'number': {'type': 'number'},
         'steps': {
             'type': 'array',
