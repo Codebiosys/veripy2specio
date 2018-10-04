@@ -1,4 +1,4 @@
-from veripy2specio.tests.fixtures import veripy_scenario
+from fixtures import veripy_scenario
 from veripy2specio import constants
 
 

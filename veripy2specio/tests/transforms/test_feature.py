@@ -1,5 +1,5 @@
 import pytest
-from veripy2specio.tests.fixtures import veripy_feature
+from fixtures import veripy_feature
 from veripy2specio import constants
 
 

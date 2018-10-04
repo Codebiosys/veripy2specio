@@ -1,4 +1,4 @@
-from veripy2specio.tests.fixtures import veripy_step
+from fixtures import veripy_step
 from veripy2specio import constants
 
 
