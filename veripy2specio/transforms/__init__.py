@@ -21,9 +21,34 @@ class Veripy2SpecioTransform(object):
 
     def __call__(self, input):
         features = [Feature(feature) for feature in input]
+        result = {
+            'defines': [],
+            'features': [],
+            'prerequisite_scripts': []
+        }
+        for feature in features:
+            if feature.is_define:
+                result['defines'].append(feature)
+            elif feature.is_setup:
+                result['prerequisite_scripts'].append(feature)
+            else:
+                result['features'].append(feature)
+
+        for feature in result['features']:
+            if len(feature.setup_tags) > 0:
+                feature.add_prerequisites(result['prerequisite_scripts'])
+
         return {
-            'all_passed': self.status_from_children(features) == constants.Status.PASSED,
-            'features': [feature.serialize() for feature in features]
+            'all_passed': self.status_from_children(result['features']) == constants.Status.PASSED,
+            'features': [
+                feature.serialize() for feature in result['features']
+            ],
+            'defines': [
+                feature.serialize() for feature in result['defines']
+            ],
+            'prerequisite_scripts': [
+                feature.serialize() for feature in result['prerequisite_scripts']
+            ],
         }
 
     def status_from_children(self, children):

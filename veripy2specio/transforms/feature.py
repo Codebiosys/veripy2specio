@@ -2,7 +2,7 @@ import re
 import markdown2
 from veripy2specio.constants import Keyword
 from .base import SpecioBase
-from .scenario import Background, Teardown, Scenario
+from .scenario import Background, Scenario
 
 
 class Feature(SpecioBase):
@@ -12,6 +12,7 @@ class Feature(SpecioBase):
         super().__init__(source)
         self.scenarios = []
         self.prerequisites = []
+        self.prerequisite_scripts = []
         self.cleanup = []
         Feature._feature_number += 1
         self.feature_number = self._feature_number
@@ -55,32 +56,64 @@ class Feature(SpecioBase):
                         prereq.id == potential_background.id
                         for prereq in self.prerequisites]):
                     self.prerequisites.append(potential_background)
-            elif any([
-                    tag.get('name', '') == 'prerequisite'
-                    for tag in element.get('tags', [])]):
-                potential_background = Background(element, 0)
-                if not any([
-                        prereq.id == potential_background.id
-                        for prereq in self.prerequisites]):
-                            self.prerequisites.append(potential_background)
-            elif any([
-                    tag.get('name', '') == 'cleanup'
-                    for tag in element.get('tags', [])]):
-                potential_cleanup = Teardown(element, 0)
-                if not any([
-                        cleanup.id == potential_cleanup.id
-                        for cleanup in self.teardown]):
-                    self.cleanup.append(Teardown(element, 0))
+            # elif any([
+            #         tag.get('name', '') == 'setup'
+            #         for tag in element.get('tags', [])]):
+            #     potential_background = Background(element, 0)
+            #     if not any([
+            #             prereq.id == potential_background.id
+            #             for prereq in self.prerequisites]):
+            #                 self.prerequisites.append(potential_background)
+            # elif any([
+            #         tag.get('name', '') == 'teardown'
+            #         for tag in element.get('tags', [])]):
+            #     potential_cleanup = Teardown(element, 0)
+            #     if not any([
+            #             cleanup.id == potential_cleanup.id
+            #             for cleanup in self.teardown]):
+            #         self.cleanup.append(Teardown(element, 0))
             else:
                 scenario_number += 1
                 self.scenarios.append(Scenario(element, scenario_number))
+
+    def add_prerequisites(self, all_setup_features):
+        """
+        """
+        for setup_feature in all_setup_features:
+            if any(tag['name'] == setup_feature.setup_name for tag in self.setup_tags):
+                self.prerequisite_scripts.append(setup_feature)
 
     @property
     def tags(self):
         return [tag for tag in self.tags_from_elements([self.source])]
 
-    def get_scenario_tags(self):
+    @property
+    def is_setup(self):
+        return any([
+            tag['name'].startswith('configure')
+            for tag in self.tags_from_elements([self.source])
+            ])
 
+    @property
+    def setup_name(self):
+        return next((
+            tag['name'].replace('configure.', '')
+            for tag in self.tags_from_elements([self.source])
+            if tag['name'].startswith('configure.')),
+            '')
+
+    @property
+    def is_define(self):
+        return any([
+            tag['name'].startswith('define')
+            for tag in self.tags_from_elements([self.source])
+        ])
+
+    @property
+    def setup_tags(self):
+        return [tag for tag in self.setup_tags_from_elements([self.source])]
+
+    def get_scenario_tags(self):
         all_tags = []
         for scenario in self.scenarios:
             all_tags.extend(scenario.tags)
@@ -88,7 +121,7 @@ class Feature(SpecioBase):
         tags = sorted(set(
             tag['name']
             for tag in all_tags
-            if tag.get('name') and tag['name'] not in ['prerequisite', 'cleanup']
+            if tag.get('name') and not tag['name'].startswith('fixture')
         ))
 
         if tags:
@@ -128,6 +161,7 @@ class Feature(SpecioBase):
             'tags': self.tags,
             'scenario_tags': self.scenario_tags,
             'prerequisites': [prereq.serialize() for prereq in self.prerequisites],
+            'prerequisite_scripts': [prereq.serialize() for prereq in self.prerequisite_scripts],
             'has_prerequisites': self.has_prerequisites,
             'cleanup': [teardown.serialize() for teardown in self.cleanup],
             'has_cleanup': self.has_cleanup,

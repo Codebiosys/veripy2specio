@@ -26,7 +26,24 @@ class SpecioBase(object):
             tag['name']
             for element in elements
             for tag in element.get('tags', [])
-            if tag.get('name') and tag['name'] not in ['setup', 'teardown']
+            if tag.get('name') and
+            not tag['name'].startswith('fixture')
+        ))
+        if tags:
+            if len(tags) > 1:
+                for tag in tags[:len(tags)-1]:
+                    yield {'name': tag, 'last': False}
+            yield {'name': tags[-1], 'last': True}
+
+    def setup_tags_from_elements(self, elements):
+        tags = sorted(set(
+            tag['name']
+            .replace('fixture.setup.', '')
+            .replace('teardown.', '')
+            for element in elements
+            for tag in element.get('tags', [])
+            if tag.get('name') and
+            tag['name'].startswith('fixture.setup')
         ))
         if tags:
             if len(tags) > 1:
