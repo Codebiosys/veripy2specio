@@ -1,5 +1,5 @@
 import pytest
-from fixtures import veripy_feature
+from veripy2specio.tests.fixtures import veripy_feature
 from veripy2specio import constants
 
 
@@ -24,16 +24,14 @@ def test_feature_properties():
     assert serialized_feature['status'] == 'Skipped'
     assert valid_feature.description == "<p>A description of the test</p>\n"
     assert serialized_feature['description'] == "<p>A description of the test</p>\n"
-    assert valid_feature.tags[0]['last']
+    assert next(valid_feature.tags)['last']
     assert serialized_feature['tags'][0]['last']
-    assert valid_feature.tags[0]['name'] == 'Test1'
+    assert next(valid_feature.tags)['name'] == 'Test1'
     assert serialized_feature['tags'][0]['name'] == 'Test1'
     assert not valid_feature.has_scenarios
     assert not serialized_feature['has_scenarios']
     assert not valid_feature.has_prerequisites
     assert not serialized_feature['has_prerequisites']
-    assert not valid_feature.has_cleanup
-    assert not serialized_feature['has_cleanup']
 
 
 @pytest.mark.parametrize("no_doc_feature", [

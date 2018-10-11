@@ -1,4 +1,4 @@
-from fixtures import veripy_scenario
+from veripy2specio.tests.fixtures import veripy_scenario
 from veripy2specio import constants
 
 
@@ -15,13 +15,13 @@ def test_scenario_properties():
     assert not valid_scenario.passed
     assert not serialized_scenario['passed']
     assert valid_scenario.scenario_number == 2
-    assert serialized_scenario['number'] == 2
+    assert serialized_scenario['scenario_number'] == 2
     assert valid_scenario.id == '_scenario_file_location_'
     assert serialized_scenario['id'] == '_scenario_file_location_'
     assert valid_scenario.status == constants.Status.SKIPPED
     assert serialized_scenario['status'] == 'Skipped'
     assert valid_scenario.description == "A Description of the Scenario"
-    assert serialized_scenario['description'] == "A Description of the Scenario"
+    assert serialized_scenario['scenario_description'] == "A Description of the Scenario"
     assert valid_scenario.tags[0]['last']
     assert serialized_scenario['tags'][0]['last']
     assert valid_scenario.tags[0]['name'] == 'Test1'
