@@ -22,31 +22,66 @@ class Message(object):
     def passed(self):
         return self.status == Status.PASSED
 
-    @property
-    def is_deviation(self):
-        return False
-
     def serialize():  # pragma: no cover
         raise NotImplementedError
 
 
-class ResultMessage(Message):
+class DeviationMessage(object):
+    _global_deviation_number = 0
+
+    def __init__(self, steps, scenario_id):
+        self.steps = steps
+        self.errors = []
+        self.has_skipped = False
+        self.scenario_id = scenario_id
+        self._populate_from_steps(steps)
+        DeviationMessage._global_deviation_number += 1
+        self.deviation_number = DeviationMessage._global_deviation_number
 
     @property
-    def result(self):
-        return self.source.get('stored_value')
+    def id(self):
+        return f'deviation_{self.scenario_id}_{self.deviation_number}'
+
+    @property
+    def status(self):
+        return self._status
+
+    @property
+    def passed(self):
+        return self._status == Status.PASSED
+
+    def _populate_from_steps(self, steps):
+        self._status = Status.SKIPPED
+        for step in steps:
+            if step.status != Status.PASSED:
+                error = {
+                    'expected': step.name,
+                    'actual': step.result,
+                    'status': step.status.value
+                }
+                if hasattr(step.attachment, 'id'):
+                    error['attachment_reference_id'] = step.attachment.id
+
+                if step.status == Status.SKIPPED and self.has_skipped:
+                    continue
+                elif step.status == Status.SKIPPED:
+                    self.has_skipped = True
+
+                if self._status != Status.FAILED:
+                    self._status = step.status
+
+                self.errors.append(error)
 
     def serialize(self):
         return {
             # Required Message properties
             'id': self.id,
-            'reference_number': self.reference_number,
-            'is_deviation': self.is_deviation,
+            'deviation_number': self.deviation_number,
             'status': self.status.value,
             'passed': self.passed,
-            # Required Result properties
-            'result': self.result
-        }
+            # Required Error properties
+            'errors': [error for error in self.errors]
+            }
 
 
 class ErrorMessage(Message):
@@ -56,10 +91,6 @@ class ErrorMessage(Message):
         super().__init__(step, source)
         ErrorMessage._global_error_number += 1
         self.error_number = ErrorMessage._global_error_number
-
-    @property
-    def is_deviation(self):
-        return Status(self.step.status) == Status.FAILED
 
     @property
     def expected(self):
@@ -84,7 +115,6 @@ class ErrorMessage(Message):
             'reference_number': self.reference_number,
             'status': self.status.value,
             'passed': self.passed,
-            'is_deviation': self.is_deviation,
             # Required Error properties
             'error': {
                 'expected': self.expected,
@@ -95,10 +125,17 @@ class ErrorMessage(Message):
 
 
 class AttachmentMessage(Message):
+    _global_figure_number = 0
 
     def __init__(self, step, source, embed):
         super().__init__(step, source)
+        AttachmentMessage._global_figure_number += 1
+        self.figure_number = AttachmentMessage._global_figure_number
         self.embed = embed
+
+    @property
+    def id(self):
+        return f'figure_{self.step.id}_{self.figure_number}'
 
     @property
     def data(self):
@@ -112,13 +149,10 @@ class AttachmentMessage(Message):
         return {
             # Required Message properties
             'id': self.id,
-            'reference_number': self.reference_number,
-            'is_deviation': self.is_deviation,
+            'figure_number': self.figure_number,
             'status': self.status.value,
             'passed': self.passed,
             # Required Attachment properties
-            'attachment': {
-                'data': self.data,
-                'type': self.media_type
-            }
+            'data': self.data,
+            'type': self.media_type
         }

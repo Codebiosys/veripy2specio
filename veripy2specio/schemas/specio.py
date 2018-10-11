@@ -21,17 +21,13 @@ message_base = {
     'type': 'object',
     'required': [
         'id',
-        'reference_number',
         'status',
         'passed',
-        'is_deviation',
     ],
     'properties': {
         'id': {'type': 'string'},
-        'reference_number': {'type': 'string'},
         'status': {'type': 'string'},
         'passed': {'type': 'boolean'},
-        'is_deviation': {'type': 'boolean'},
     },
 }
 
@@ -47,28 +43,16 @@ tag = {
     ],
 }
 
-reference = {
-    'type': 'object',
-    'properties': {
-        'id': {'type': 'string'},
-        'reference_number': {'type': 'number'},
-        'last': {'type': 'boolean'},
-    },
-    'required': [
-        'id',
-        'reference_number',
-        'last',
-    ],
-}
-
 # Components
 attachment = {
     'type': 'object',
     'required': [
+        *message_base.get('required'),
         'data',
         'type'
     ],
     'properties': {
+        **message_base.get('properties'),
         'data': {'type': 'string'},
         'type': {'type': 'string'}
     },
@@ -77,75 +61,98 @@ attachment = {
 error = {
     'type': 'object',
     'required': [
-        'error_number',
         'expected',
         'actual',
     ],
     'properties': {
         'expected': {'type': 'string'},
         'actual': {'type': 'string'},
+    },
+}
+
+deviation = {
+    'type': 'object',
+    'required': [
+        *message_base.get('properties'),
+        'deviation_number',
+        'errors',
+    ],
+    'properties': {
+        **message_base.get('properties'),
+        'errors': {
+            'type': 'array',
+            'items': error,
+        },
+        'deviation_number': {'type': 'number'}
+    },
+}
+
+
+error = {
+    'type': 'object',
+    'required': [
+        *message_base.get('properties'),
+        'error_number',
+        'expected',
+        'actual',
+    ],
+    'properties': {
+        **message_base.get('properties'),
+        'expected': {'type': 'string'},
+        'actual': {'type': 'string'},
         'error_number': {'type': 'number'}
     },
 }
 
-step_message = {
-    'type': 'object',
-    'properties': {
-        'id': {'type': 'string'},
-        'reference_number': {'type': 'number'},
-        'is_deviation': {'type': 'boolean'},
-        'status': {'type': 'string'},
-        'passed': {'type': 'boolean'},
-        'attachment': attachment,
-        'error': error,
-        'result': {'type': 'string'}
-    },
-    'required': [
-        'id',
-        'reference_number',
-        'is_deviation',
-        'status',
-        'passed'
-    ]
-}
-
-step = {
+instruction = {
     'type': 'object',
     'properties': {
         **specio_base.get('properties'),
         'note': {'type': 'string'},
-        'references': {
-            'type': 'array',
-            'items': reference
-            },
+        'error_reference_id': {'type': 'string'}
     },
     'required': [
         *specio_base.get('required'),
     ],
 }
 
-step_group = {
+result = {
     'type': 'object',
     'properties': {
-        'given_when': {
+        **specio_base.get('properties'),
+        'result': {'type': 'string'},
+        'error_reference_id': {'type': 'string'},
+        'attachment_reference_id': {'type': 'string'},
+        'note': {'type': 'string'},
+    },
+    'required': [
+        *specio_base.get('required'),
+        'result'
+    ],
+}
+
+instructions_results = {
+    'type': 'object',
+    'properties': {
+        'instructions': {
             'type': 'array',
-            'items': step,
+            'items': instruction,
         },
-        'then': {
+
+        'results': {
             'type': 'array',
-            'items': step,
+            'items': result,
         },
-        'messages': {
+        'attachments': {
             'type': 'array',
-            'items': step_message,
+            'items': attachment,
         },
         'status': {'type': 'string'},
         'passed': {'type': 'boolean'}
     },
     'required': [
-        'given_when',
-        'then',
-        'messages',
+        'instructions',
+        'results',
         'passed',
         'status'
     ],
@@ -156,27 +163,95 @@ scenario = {
     'properties': {
         **specio_base.get('properties'),
         'scenario_name': {'type': 'string'},
-        'doc_string': {
-            'type': 'object',
-            'properties': {
-                'value': {'type': 'string'}
-            }},
-        'number': {'type': 'number'},
-        'steps': {
+        'scenario_description': {'type': 'string'},
+        'scenario_number': {'type': 'number'},
+        'instructions_results': {
             'type': 'array',
-            'items': step_group,
+            'items': instructions_results,
         },
         'tags': {
             'type': 'array',
             'items': tag,
         },
+        'deviation': deviation,
+        'table': {
+            'type': 'object',
+            'properties': {
+                'headers': {
+                    'type': 'array',
+                },
+                'rows': {
+                    'type': 'array',
+                },
+            },
+        },
     },
     'required': [
         *specio_base.get('required'),
         'scenario_name',
-        'number',
-        'steps',
+        'scenario_number',
+        'instructions_results',
         'tags'
+    ],
+}
+
+prerequisite_scenario = {
+    'type': 'object',
+    'properties': {
+            'id': {'type': 'string'},
+            'name': {'type': 'string'},
+            'keyword': {'type': 'string'},
+
+        'scenario_name': {'type': 'string'},
+        'scenario_description': {'type': 'string'},
+        'scenario_number': {'type': 'number'},
+        'tags': {
+            'type': 'array',
+            'items': tag,
+            },
+        'table': {
+            'type': 'object',
+            'properties': {
+                'headers': {
+                    'type': 'array',
+                },
+                'rows': {
+                    'type': 'array',
+                },
+            },
+            },
+    },
+    'required': [
+        'id',
+        'name',
+        'keyword',
+        'scenario_name',
+        'scenario_number',
+    ],
+}
+
+prerequisite_script = {
+    'type': 'object',
+    'properties': {
+        'id': {'type': 'string'},
+        'name': {'type': 'string'},
+        'keyword': {'type': 'string'},
+        'feature_name': {'type': 'string'},
+        'description': {'type': 'string'},
+        'has_scenarios': {'type': 'boolean'},
+        'feature_number': {'type': 'number'},
+        'scenarios': {
+            'type': 'array',
+            'items': prerequisite_scenario,
+        },
+    },
+    'required': [
+        'id',
+        'name',
+        'keyword',
+        'feature_name',
+        'scenarios',
+        'feature_number'
     ],
 }
 
@@ -191,16 +266,21 @@ feature = {
             'items': scenario,
         },
         'has_scenarios': {'type': 'boolean'},
+        'skipped_scenarios': {
+            'type': 'array',
+            'items': scenario,
+        },
+        'has_skipped_scenarios': {'type': 'boolean'},
         'prerequisites': {
             'type': 'array',
             'items': scenario,
         },
         'has_prerequisites': {'type': 'boolean'},
-        'cleanup': {
+        'prerequisite_scripts': {
             'type': 'array',
-            'items': scenario,
+            'items': prerequisite_script,
         },
-        'has_cleanup': {'type': 'boolean'},
+        'has_prerequisite_scripts': {'type': 'boolean'},
         'tags': {
             'type': 'array',
             'items': tag,
@@ -233,6 +313,14 @@ schema = {
     ],
     'properties': {
         'all_passed': {'type': 'boolean'},
+        'setup_scripts': {
+            'type': 'array',
+            'items': prerequisite_script,
+        },
+        'defines': {
+            'type': 'array',
+            'items': feature,
+        },
         'features': {
             'type': 'array',
             'items': feature,

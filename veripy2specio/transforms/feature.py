@@ -1,6 +1,6 @@
 import re
 import markdown2
-from veripy2specio.constants import Keyword
+from veripy2specio.constants import Keyword, Status
 from .base import SpecioBase
 from .scenario import Background, Scenario
 
@@ -10,10 +10,10 @@ class Feature(SpecioBase):
 
     def __init__(self, source):
         super().__init__(source)
-        self.scenarios = []
-        self.prerequisites = []
-        self.prerequisite_scripts = []
-        self.cleanup = []
+        self._scenarios = []
+        self._skipped_scenarios = []
+        self._prerequisites = []
+        self._prerequisite_scripts = []
         Feature._feature_number += 1
         self.feature_number = self._feature_number
         self._populate_from_source(source)
@@ -47,45 +47,57 @@ class Feature(SpecioBase):
         Using the given elements, enumerate through each and
         transform into a scenario
         """
-        # import pdb; pdb.set_trace()
         scenario_number = 0
         for element in source.get('elements', []):
             if Keyword(element.get('type')) == Keyword.BACKGROUND:
                 potential_background = Background(element, 0)
                 if not any([
                         prereq.id == potential_background.id
-                        for prereq in self.prerequisites]):
-                    self.prerequisites.append(potential_background)
-            # elif any([
-            #         tag.get('name', '') == 'setup'
-            #         for tag in element.get('tags', [])]):
-            #     potential_background = Background(element, 0)
-            #     if not any([
-            #             prereq.id == potential_background.id
-            #             for prereq in self.prerequisites]):
-            #                 self.prerequisites.append(potential_background)
-            # elif any([
-            #         tag.get('name', '') == 'teardown'
-            #         for tag in element.get('tags', [])]):
-            #     potential_cleanup = Teardown(element, 0)
-            #     if not any([
-            #             cleanup.id == potential_cleanup.id
-            #             for cleanup in self.teardown]):
-            #         self.cleanup.append(Teardown(element, 0))
+                        for prereq in self._prerequisites]):
+                    self._prerequisites.append(potential_background)
             else:
                 scenario_number += 1
-                self.scenarios.append(Scenario(element, scenario_number))
+                new_scenario = Scenario(element, scenario_number)
+                if new_scenario.status != Status.SKIPPED:
+                    self._scenarios.append(new_scenario)
+                else:
+                    self._skipped_scenarios.append(new_scenario)
 
-    def add_prerequisites(self, all_setup_features):
+    @property
+    def scenarios(self):
+        return self._scenarios
+
+    @property
+    def skipped_scenarios(self):
+        return self._skipped_scenarios
+
+    @property
+    def all_scenarios(self):
+        return [*self._scenarios, *self._skipped_scenarios]
+
+    def add_prerequisite_scripts(self, all_setup_features):
         """
         """
         for setup_feature in all_setup_features:
             if any(tag['name'] == setup_feature.setup_name for tag in self.setup_tags):
-                self.prerequisite_scripts.append(setup_feature)
+                self._prerequisite_scripts.append(setup_feature)
+
+    @property
+    def has_prerequisite_scripts(self):
+        return len(self.prerequisite_scripts) > 0
+
+    @property
+    def prerequisite_scripts(self):
+        return self._prerequisite_scripts
 
     @property
     def tags(self):
-        return [tag for tag in self.tags_from_elements([self.source])]
+        for tag in self.tags_from_elements([self.source]):
+            if not tag['name'].startswith('configure') and \
+               not tag['name'].startswith('setup') and \
+               not tag['name'].startswith('define') and \
+               not tag['name'].startswith('skip'):
+                yield tag
 
     @property
     def is_setup(self):
@@ -139,12 +151,49 @@ class Feature(SpecioBase):
         return len(self.scenarios) > 0
 
     @property
+    def has_skipped_scenarios(self):
+        return len(self.skipped_scenarios) > 0
+
+    @property
+    def has_deviations(self):
+        return any(
+            scenario.deviation is not None
+            for scenario in self.scenarios
+        )
+
+    @property
+    def has_attachments(self):
+        return any(
+            step.attachment is not None
+            for scenario in self.scenarios
+            for step in scenario.steps
+        )
+
+    @property
     def has_prerequisites(self):
         return len(self.prerequisites) > 0
 
     @property
-    def has_cleanup(self):
-        return len(self.cleanup) > 0
+    def prerequisites(self):
+        return self._prerequisites
+
+    def serialize_prerequisite_script(self):
+        serialized = {
+            # Required Base properties
+            'id': self.id,
+            'name': self.name,
+            'keyword': self.keyword.value,
+            # Required Feature properties
+            'feature_name': self.name,
+            'has_scenarios': self.has_scenarios,
+            'feature_number': self.feature_number,
+            'scenarios': [scenario.serialize_prerequisite() for scenario in self.all_scenarios],
+            }
+
+        if self.description:
+            serialized['description'] = self.description
+
+        return serialized
 
     def serialize(self):
         serialized = {
@@ -157,14 +206,20 @@ class Feature(SpecioBase):
             # Required Feature properties
             'feature_name': self.name,
             'scenarios': [scenario.serialize() for scenario in self.scenarios],
+            'skipped_scenarios': [scenario.serialize() for scenario in self.skipped_scenarios],
             'has_scenarios': self.has_scenarios,
-            'tags': self.tags,
+            'has_skipped_scenarios': self.has_skipped_scenarios,
+            'has_deviations': self.has_deviations,
+            'has_attachments': self.has_attachments,
+            'tags': [tag for tag in self.tags],
             'scenario_tags': self.scenario_tags,
             'prerequisites': [prereq.serialize() for prereq in self.prerequisites],
-            'prerequisite_scripts': [prereq.serialize() for prereq in self.prerequisite_scripts],
+            'prerequisite_scripts': [
+                prereq.serialize_prerequisite_script()
+                for prereq in self.prerequisite_scripts
+            ],
             'has_prerequisites': self.has_prerequisites,
-            'cleanup': [teardown.serialize() for teardown in self.cleanup],
-            'has_cleanup': self.has_cleanup,
+            'has_prerequisite_scripts': self.has_prerequisite_scripts,
             'feature_number': self.feature_number
             }
 

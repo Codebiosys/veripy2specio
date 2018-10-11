@@ -36,9 +36,10 @@ class Veripy2SpecioTransform(object):
 
         for feature in result['features']:
             if len(feature.setup_tags) > 0:
-                feature.add_prerequisites(result['prerequisite_scripts'])
+                feature.add_prerequisite_scripts(result['prerequisite_scripts'])
 
         return {
+            'all_tags': [],  # TODO: pull all tags so commas work
             'all_passed': self.status_from_children(result['features']) == constants.Status.PASSED,
             'features': [
                 feature.serialize() for feature in result['features']
@@ -46,8 +47,9 @@ class Veripy2SpecioTransform(object):
             'defines': [
                 feature.serialize() for feature in result['defines']
             ],
-            'prerequisite_scripts': [
-                feature.serialize() for feature in result['prerequisite_scripts']
+            'setup_scripts': [
+                feature.serialize_prerequisite_script()
+                for feature in result['prerequisite_scripts']
             ],
         }
 

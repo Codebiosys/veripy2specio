@@ -1,14 +1,15 @@
 import re
 from veripy2specio.constants import Status
 from .base import SpecioBase
-from .message import ErrorMessage, ResultMessage, AttachmentMessage
+from .message import AttachmentMessage
 
 
 class Step(SpecioBase):
     def __init__(self, source, scenario_id):
         super().__init__(source)
-        self.messages = []
         self.scenario_id = scenario_id
+        self._error_message = None
+        self._attachment = None
         self._populate_from_source(source)
 
     @property
@@ -20,35 +21,52 @@ class Step(SpecioBase):
         return Status(self.source['result']['status'])
 
     @property
+    def stored_value(self):
+        return self.source.get('stored_value', None)
+
+    @property
     def note(self):
         return self.source.get('doc_string', {}).get('value', None)
 
-    def references(self):
-        if len(self.messages):
-            if len(self.messages) > 1:
-                for message in self.messages[:len(self.messages)-1]:
-                    yield {
-                            'id': message.id,
-                            'reference_number': message.reference_number,
-                            'last': False
-                        }
-            yield {
-                    'id': self.messages[-1].id,
-                    'reference_number': self.messages[-1].reference_number,
-                    'last': True
-                 }
-
     def _populate_from_source(self, source):
-        if 'stored_value' in source:
-            self.messages.append(ResultMessage(self, source))
-
-        if Status(source.get('result').get('status')) != Status.PASSED:
-            self.messages.append(ErrorMessage(self, source))
-
         for embed in source.get('embeddings', []):
-            self.messages.append(AttachmentMessage(self, source, embed))
+            self._attachment = AttachmentMessage(self, source, embed)
 
-    def serialize(self):
+    @property
+    def result(self):
+        if self.status != Status.PASSED:
+            message = 'Unable to complete instructions.'
+            if 'error_message' in self.source.get('result', {}):
+                message = self.source['result']['error_message'].replace('Assertion Failed: ', '')
+            elif self.status == Status.SKIPPED:
+                message = "Unable to complete instructions. " \
+                    "Either a previous instruction failed, or the test case" \
+                    " configuration requires manual intervention."
+            elif self.status == Status.UNDEFINED:
+                message = "Unable to complete instructions. "\
+                    "The test case is not valid."
+            else:
+                message = 'Unable to complete instructions.'
+            if self._attachment:
+                message += f" Figure {self.attachment.figure_number}."
+            return message
+
+        elif self.stored_value:
+            return self.stored_value
+
+        elif self._attachment:
+            return f"Figure {self.attachment.figure_number}."
+        return self.name
+
+    @property
+    def attachment(self):
+        return self._attachment
+
+    @property
+    def error(self):
+        return self._error_message
+
+    def serialize_instruction(self):
         serialized = {
             # Required Base properties
             'id': self.id,
@@ -57,24 +75,40 @@ class Step(SpecioBase):
             'status': self.status.value,
             'passed': self.passed,
             # Optional List properties
-            'references': [reference for reference in self.references()],
         }
         if self.note:
             serialized['note'] = self.note
         return serialized
 
+    def serialize_result(self):
+        serialized = {
+            # Required Base properties
+            'id': self.id,
+            'name': self.name,
+            'keyword': self.keyword.value,
+            'status': self.status.value,
+            'passed': self.passed,
+            # Optional List properties
+            'result': self.result,
+        }
+        if self.note:
+            serialized['note'] = self.note
+        if self.attachment:
+            serialized['attachment_reference_id'] = self.attachment.id
+        return serialized
 
-class StepGroup(object):
+
+class InstructionsResults(object):
 
     def __init__(self):
-        self.given_when = []
-        self.then = []
+        self.instructions = []
+        self.results = []
 
     def add_step(self, step, switch):
         if switch == "GIVEN_WHEN":
-            self.given_when.append(step)
+            self.instructions.append(step)
         elif switch == "THEN":
-            self.then.append(step)
+            self.results.append(step)
         else:
             raise KeyError(f'StepGroup does not have a {switch}')
 
@@ -88,27 +122,33 @@ class StepGroup(object):
 
     @property
     def status(self):
-        return self.status_from_children([*self.given_when, *self.then])
+        return self.status_from_children([*self.instructions, *self.results])
 
     @property
     def passed(self):
         return self.status == Status.PASSED
 
     @property
-    def messages(self):
-        for step in self.given_when:
-            for message in step.messages:
-                yield message
-        for step in self.then:
-            for message in step.messages:
-                yield message
+    def attachments(self):
+        for step in [*self.instructions, *self.results]:
+            if step.attachment:
+                yield step.attachment
 
     def serialize(self):
         return {
             # Required Step Group fields
-            'given_when': [step.serialize() for step in self.given_when],
-            'then': [step.serialize() for step in self.then],
-            'messages': [message.serialize() for message in self.messages],
+            'instructions': [
+                step.serialize_instruction()
+                for step in self.instructions
+            ],
+            'results': [
+                step.serialize_result()
+                for step in self.results
+            ],
+            'attachments': [
+                attachment.serialize()
+                for attachment in self.attachments
+            ],
             'status': self.status.value,
             'passed': self.passed,
         }
