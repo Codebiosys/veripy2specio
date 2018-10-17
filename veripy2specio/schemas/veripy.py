@@ -37,7 +37,8 @@ result = {
     'type': 'object',
     'properties': {
         'duration': {'type': 'integer'},
-        'status': {'type': 'string'}
+        'status': {'type': 'string'},
+        'error_message': {'type': 'string'}
     },
     'required': [
         'duration',
@@ -112,14 +113,10 @@ scenario = {
         },
     },
     'required': [
-        'description',
-        'id',
         'keyword',
-        'line',
         'location',
         'name',
         'steps',
-        'tags',
         'type'
     ]
 }
@@ -144,8 +141,6 @@ feature = {
         },
     },
     'required': [
-        'description',
-        'elements',
         'id',
         'keyword',
         'line',
