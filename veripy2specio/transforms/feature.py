@@ -6,6 +6,7 @@ from .scenario import Background, Scenario
 
 
 class Feature(SpecioBase):
+    _feature_number = 0
 
     def __init__(self, source):
         super().__init__(source)
@@ -26,9 +27,7 @@ class Feature(SpecioBase):
 
     @property
     def feature_number(self):
-        if self._feature_number:
-            return self._feature_number
-        return 0
+        return self._feature_number
 
     def set_feature_number(self, feature_number):
         self._feature_number = feature_number
@@ -103,8 +102,6 @@ class Feature(SpecioBase):
             if not tag['name'].startswith('configure') and \
                not tag['name'].startswith('setup') and \
                not tag['name'].startswith('define') and \
-               not tag['name'].startswith('fixture') and \
-               not tag['name'].startswith('teardown') and \
                not tag['name'].startswith('skip'):
                 yield tag
 
@@ -160,14 +157,6 @@ class Feature(SpecioBase):
         return len(self.scenarios) > 0
 
     @property
-    def has_setup(self):
-        return any(scenario.is_setup for scenario in self.all_scenarios)
-
-    @property
-    def has_teardown(self):
-        return any(scenario.is_teardown for scenario in self.all_scenarios)
-
-    @property
     def has_skipped_scenarios(self):
         return len(self.skipped_scenarios) > 0
 
@@ -195,7 +184,6 @@ class Feature(SpecioBase):
         return self._prerequisites
 
     def serialize_prerequisite_script(self):
-
         serialized = {
             # Required Base properties
             'id': self.id,
@@ -204,8 +192,6 @@ class Feature(SpecioBase):
             # Required Feature properties
             'feature_name': self.name,
             'has_scenarios': self.has_scenarios,
-            'has_setup': self.has_setup,
-            'has_teardown': self.has_teardown,
             'feature_number': self.feature_number,
             'scenarios': [scenario.serialize_prerequisite() for scenario in self.all_scenarios],
             }

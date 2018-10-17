@@ -6,6 +6,8 @@ def test_feature_properties(feature_no_scenarios):
     from veripy2specio.transforms.feature import Feature
 
     valid_feature = Feature(feature_no_scenarios)
+    valid_feature.set_feature_number(1)
+
     serialized_feature = valid_feature.serialize()
     # Base Props
     assert valid_feature.source == feature_no_scenarios
