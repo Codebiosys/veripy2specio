@@ -34,7 +34,10 @@ class Veripy2SpecioTransform(object):
             else:
                 result['features'].append(feature)
 
+        feature_number = 0
         for feature in result['features']:
+            feature_number += 1
+            feature.set_feature_number(feature_number)
             if len(feature.setup_tags) > 0:
                 feature.add_prerequisite_scripts(result['prerequisite_scripts'])
 

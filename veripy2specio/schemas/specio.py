@@ -182,6 +182,14 @@ scenario = {
                 },
                 'rows': {
                     'type': 'array',
+                    'items': {
+                        'type': 'object',
+                        'properties': {
+                            'data': {
+                                'type': 'array'
+                            }
+                        }
+                    }
                 },
             },
         },
@@ -205,6 +213,8 @@ prerequisite_scenario = {
         'scenario_name': {'type': 'string'},
         'scenario_description': {'type': 'string'},
         'scenario_number': {'type': 'number'},
+        'is_setup': {'type': 'boolean'},
+        'is_teardown': {'type': 'boolean'},
         'tags': {
             'type': 'array',
             'items': tag,
@@ -240,6 +250,8 @@ prerequisite_script = {
         'description': {'type': 'string'},
         'has_scenarios': {'type': 'boolean'},
         'feature_number': {'type': 'number'},
+        'has_setup': {'type': 'boolean'},
+        'has_teardown': {'type': 'boolean'},
         'scenarios': {
             'type': 'array',
             'items': prerequisite_scenario,

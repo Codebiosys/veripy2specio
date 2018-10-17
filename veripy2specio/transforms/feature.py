@@ -14,8 +14,7 @@ class Feature(SpecioBase):
         self._skipped_scenarios = []
         self._prerequisites = []
         self._prerequisite_scripts = []
-        Feature._feature_number += 1
-        self.feature_number = self._feature_number
+        self._feature_number = 0
         self._populate_from_source(source)
 
     @property
@@ -25,6 +24,13 @@ class Feature(SpecioBase):
     @property
     def status(self):
         return self.status_from_children(self.scenarios)
+
+    @property
+    def feature_number(self):
+        return self._feature_number
+
+    def set_feature_number(self, feature_number):
+        self._feature_number = feature_number
 
     @property
     def description(self):
