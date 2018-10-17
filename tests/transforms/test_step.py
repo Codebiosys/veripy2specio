@@ -1,11 +1,10 @@
-from veripy2specio.tests.fixtures import veripy_step
 from veripy2specio import constants
 
 
-def test_step_properties():
+def test_step_properties(given_step):
     from veripy2specio.transforms.step import Step
     scenario_id = 'feature_scenario_location'
-    valid_step = Step(veripy_step.given_step, scenario_id)
+    valid_step = Step(given_step, scenario_id)
     serialized_step = valid_step.serialize_result()
     # Base Props
     assert valid_step.keyword == constants.Keyword.GIVEN

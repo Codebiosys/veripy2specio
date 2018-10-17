@@ -1,15 +1,14 @@
-from veripy2specio.tests.fixtures import veripy_step
 from veripy2specio import constants
 
 
-def test_error_message_properties():
+def test_error_message_properties(step_with_messages):
     from veripy2specio.transforms.step import Step
     from veripy2specio.transforms.message import ErrorMessage
     scenario_id = 'feature_scenario_location'
 
-    valid_step = Step(veripy_step.step_with_messages, scenario_id)
+    valid_step = Step(step_with_messages, scenario_id)
 
-    error_message = ErrorMessage(valid_step, veripy_step.step_with_messages)
+    error_message = ErrorMessage(valid_step, step_with_messages)
     serialized_message = error_message.serialize()
     # Base Props
     # One was created during the Step init, and previous steps update as well
@@ -30,14 +29,14 @@ def test_error_message_properties():
     assert serialized_message['error']['actual'] == "an error occurred"
 
 
-def test_skipped_error_message_properties():
+def test_skipped_error_message_properties(step_skipped):
     from veripy2specio.transforms.step import Step
     from veripy2specio.transforms.message import ErrorMessage
     scenario_id = 'feature_scenario_location'
 
-    valid_step = Step(veripy_step.step_skipped, scenario_id)
+    valid_step = Step(step_skipped, scenario_id)
 
-    error_message = ErrorMessage(valid_step, veripy_step.step_skipped)
+    error_message = ErrorMessage(valid_step, step_skipped)
     serialized_message = error_message.serialize()
     # Base Props
     # One was created during the Step init, and previous steps update as well
@@ -54,14 +53,14 @@ def test_skipped_error_message_properties():
         "This is likely because a previous step failed."
 
 
-def test_undefined_error_message_properties():
+def test_undefined_error_message_properties(step_undefined):
     from veripy2specio.transforms.step import Step
     from veripy2specio.transforms.message import ErrorMessage
     scenario_id = 'feature_scenario_location'
 
-    valid_step = Step(veripy_step.step_undefined, scenario_id)
+    valid_step = Step(step_undefined, scenario_id)
 
-    error_message = ErrorMessage(valid_step, veripy_step.step_undefined)
+    error_message = ErrorMessage(valid_step, step_undefined)
     serialized_message = error_message.serialize()
     # Base Props
     # One was created during the Step init, and previous steps update as well
@@ -78,17 +77,17 @@ def test_undefined_error_message_properties():
         "This means the plan was not valid."
 
 
-def test_attachment_message_properties():
+def test_attachment_message_properties(step_with_messages):
     from veripy2specio.transforms.step import Step
     from veripy2specio.transforms.message import AttachmentMessage
     scenario_id = 'feature_scenario_location'
 
-    valid_step = Step(veripy_step.step_with_messages, scenario_id)
+    valid_step = Step(step_with_messages, scenario_id)
 
     attachment_message = AttachmentMessage(
         valid_step,
-        veripy_step.step_with_messages,
-        veripy_step.step_with_messages['embeddings'][0]
+        step_with_messages,
+        step_with_messages['embeddings'][0]
         )
     serialized_message = attachment_message.serialize()
     # Base Props
