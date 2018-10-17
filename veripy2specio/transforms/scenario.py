@@ -37,11 +37,20 @@ class Scenario(SpecioBase):
 
     @property
     def table_rows(self):
-        return self.source.get('table', {}).get('rows', [])
+        for row in self.source.get('table', {}).get('rows', []):
+            yield {'data': row}
 
     @property
     def tags(self):
         return [tag for tag in self.tags_from_elements([self.source])]
+
+    @property
+    def is_setup(self):
+        return any(tag['name'] == 'setup' for tag in self.tags)
+
+    @property
+    def is_teardown(self):
+        return any(tag['name'] == 'teardown' for tag in self.tags)
 
     def _populate_from_source(self, source):
         """
@@ -93,7 +102,6 @@ class Scenario(SpecioBase):
         return self._deviation
 
     def serialize_prerequisite(self):
-
         serialized = {
             # Required Base properties
             'id': self.id,
@@ -103,6 +111,8 @@ class Scenario(SpecioBase):
             'scenario_name': self.name,
             'scenario_number': self.scenario_number,
             'tags': self.tags,
+            'is_setup': self.is_setup,
+            'is_teardown': self.is_teardown,
             }
 
         if self.description:
@@ -111,7 +121,7 @@ class Scenario(SpecioBase):
         if self.has_table:
             serialized['table'] = {
                 'headers': self.table_headers,
-                'rows': self.table_rows
+                'rows': [row for row in self.table_rows]
             }
         return serialized
 
@@ -139,7 +149,7 @@ class Scenario(SpecioBase):
         if self.has_table:
             serialized['table'] = {
                 'headers': self.table_headers,
-                'rows': self.table_rows
+                'rows': [row for row in self.table_rows]
             }
         return serialized
 
