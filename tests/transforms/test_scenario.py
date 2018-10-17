@@ -1,11 +1,10 @@
-from veripy2specio.tests.fixtures import veripy_scenario
 from veripy2specio import constants
 
 
-def test_scenario_properties():
+def test_scenario_properties(scenario_no_steps):
     from veripy2specio.transforms.scenario import Scenario
     scenario_number = 2
-    valid_scenario = Scenario(veripy_scenario.scenario_no_steps, scenario_number)
+    valid_scenario = Scenario(scenario_no_steps, scenario_number)
     serialized_scenario = valid_scenario.serialize()
     # Base Props
     assert valid_scenario.keyword == constants.Keyword.SCENARIO

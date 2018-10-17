@@ -2,7 +2,7 @@ import os.path
 
 import pytest
 
-FIXTURE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'fixtures'))
+FIXTURE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '_files'))
 
 
 @pytest.fixture(params=[
