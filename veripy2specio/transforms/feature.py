@@ -108,7 +108,7 @@ class Feature(SpecioBase):
     @property
     def is_setup(self):
         return any([
-            tag['name'].startswith('configure')
+            tag['name'] == 'configure'
             for tag in self.tags_from_elements([self.source])
             ])
 
