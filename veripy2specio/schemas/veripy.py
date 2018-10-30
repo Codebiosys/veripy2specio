@@ -86,19 +86,8 @@ step = {
         'table': {
             'type': 'object',
             'properties': {
-                # 'headers': {
-                #     'type': 'array',
-                # },
                 'rows': {
                     'type': 'array',
-                    # 'items': {
-                    #     'type': 'object',
-                    #     'properties': {
-                    #         'cells': {
-                    #             'type': 'array'
-                    #         }
-                    #     }
-                    # }
                 },
             },
         },
