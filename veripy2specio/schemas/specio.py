@@ -174,7 +174,7 @@ scenario = {
             'items': tag,
         },
         'deviation': deviation,
-        'table': {
+        'scenario_table': {
             'type': 'object',
             'properties': {
                 'headers': {
@@ -185,7 +185,7 @@ scenario = {
                     'items': {
                         'type': 'object',
                         'properties': {
-                            'data': {
+                            'cells': {
                                 'type': 'array'
                             }
                         }

@@ -45,7 +45,10 @@ class Feature(SpecioBase):
                         description
                         ).strip()
             if stripped:
-                return markdown2.markdown(stripped)
+                return markdown2.markdown(
+                    stripped,
+                    extras=['break-on-newline', 'code-friendly', 'cuddled-lists']
+                    )
         return None
 
     def _populate_from_source(self, source):
