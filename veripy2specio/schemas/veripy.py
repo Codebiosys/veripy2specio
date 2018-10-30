@@ -82,7 +82,26 @@ step = {
           'items': embedding
         },
         'step_type': {'type': 'string'},
-        'doc_string': step_docstring
+        'doc_string': step_docstring,
+        'table': {
+            'type': 'object',
+            'properties': {
+                # 'headers': {
+                #     'type': 'array',
+                # },
+                'rows': {
+                    'type': 'array',
+                    # 'items': {
+                    #     'type': 'object',
+                    #     'properties': {
+                    #         'cells': {
+                    #             'type': 'array'
+                    #         }
+                    #     }
+                    # }
+                },
+            },
+        },
     },
     'required': [
         'keyword',

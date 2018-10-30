@@ -33,6 +33,45 @@ class Step(SpecioBase):
             self._attachment = AttachmentMessage(self, source, embed)
 
     @property
+    def has_table(self):
+        return 'rows' in self.source and len(self.source['rows'])
+
+    @property
+    def table_headers(self):
+        header = next(iter(self.source.get('rows') or []), None)
+        return header.get('cells', [])
+
+    @property
+    def table_type(self):
+        headers = self.table_headers
+        if len(headers) == 1:
+            return 'single'
+        elif len(headers) == 2 and ('element' in headers or 'field' in headers):
+            return 'paired'
+        else:
+            return 'tabular'
+
+    @property
+    def table_rows(self):
+        all_rows = iter(self.source.get('rows') or [])
+        next(all_rows, None)
+        if self.table_type == 'single':
+            results = []
+            for row in all_rows:
+                for cell in row['cells']:
+                    results.append(cell)
+            return results
+        elif self.table_type == 'paired':
+            results = []
+            for row in all_rows:
+                results.append({
+                    'location': row['cells'][0],
+                    'data': row['cells'][1]
+                })
+            return results
+        return [row for row in all_rows]
+
+    @property
     def result(self):
         if self.status != Status.PASSED:
             message = 'Unable to complete instructions.'
@@ -76,6 +115,14 @@ class Step(SpecioBase):
             'passed': self.passed,
             # Optional List properties
         }
+        if self.has_table:
+            serialized['table'] = {
+                'headers': self.table_headers,
+                'rows': self.table_rows,
+                'table_type_single': self.table_type == 'single',
+                'table_type_paired': self.table_type == 'paired',
+                'table_type_tabular': self.table_type == 'tabular',
+            }
         if self.note:
             serialized['note'] = self.note
         return serialized
@@ -91,6 +138,14 @@ class Step(SpecioBase):
             # Optional List properties
             'result': self.result,
         }
+        if self.has_table:
+            serialized['table'] = {
+                'headers': self.table_headers,
+                'rows': self.table_rows,
+                'table_type_single': self.table_type == 'single',
+                'table_type_paired': self.table_type == 'paired',
+                'table_type_tabular': self.table_type == 'tabular',
+            }
         if self.note:
             serialized['note'] = self.note
         if self.attachment:

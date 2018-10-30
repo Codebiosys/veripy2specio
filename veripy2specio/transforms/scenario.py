@@ -29,16 +29,16 @@ class Scenario(SpecioBase):
 
     @property
     def has_table(self):
-        return 'table' in self.source
+        return 'scenario_table' in self.source
 
     @property
     def table_headers(self):
-        return self.source.get('table', {}).get('headings', [])
+        return self.source.get('scenario_table', {}).get('headings', [])
 
     @property
     def table_rows(self):
-        for row in self.source.get('table', {}).get('rows', []):
-            yield {'data': row}
+        for row in self.source.get('scenario_table', {}).get('rows', []):
+            yield {'cells': row}
 
     @property
     def tags(self):
@@ -119,7 +119,7 @@ class Scenario(SpecioBase):
             serialized['scenario_description'] = self.description
 
         if self.has_table:
-            serialized['table'] = {
+            serialized['scenario_table'] = {
                 'headers': self.table_headers,
                 'rows': [row for row in self.table_rows]
             }
@@ -147,7 +147,7 @@ class Scenario(SpecioBase):
             serialized['deviation'] = self.deviation.serialize()
 
         if self.has_table:
-            serialized['table'] = {
+            serialized['scenario_table'] = {
                 'headers': self.table_headers,
                 'rows': [row for row in self.table_rows]
             }
